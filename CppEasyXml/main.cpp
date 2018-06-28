@@ -76,8 +76,21 @@ int TestFile()
 
 	return 0;
 }
+int TestFileParse(const char * FilePathName)
+{
+
+	CppEasyXml xml;
+	std::string encode = xml.GetEncodeType(FilePathName);
+	printf("%s\r\n", encode.c_str());
+	xml.parseFile(FilePathName);
+	std::string xxstr = UToA(xml.toString());
+	printf("%s\r\n", xxstr.c_str());
+
+	return 0;
+}
 int wmain(int argc, wchar_t* argv[])
 {
+	TestFileParse("../Test/UISkin1.xml");
 	TestFile();
 	//Test1();
 	return 0;

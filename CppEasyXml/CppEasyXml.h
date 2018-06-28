@@ -71,6 +71,7 @@ public:
 	std::string ToString()
 	{
 		std::string strXml;
+		std::string strSub;
 		strXml+=leftAnglebrackets;
 		strXml+=name;
 		if(attr.size()>0)
@@ -84,25 +85,46 @@ public:
 				strXml+=attr.at(i).attrValue;
 				strXml+=double_quotation_marks;
 			}
-		}
-		strXml+=rightAnglebrackets;
-		strXml+="\n";
+		}		
 		if(subnode.size()>0)
 		{
 			for(int i=0;i<subnode.size();i++)
 			{
-				strXml+=subnode.at(i).ToString();
+				strSub+=subnode.at(i).ToString();
 			}
 		}
 		if(data.length()>0)
-		{			
+		{	
+			strXml += rightAnglebrackets;
+			strXml += "\n";
+			strXml += strSub;
 			strXml+=data;
 			strXml+="\n";
+			strXml += leftAnglebrackets;
+			strXml += slash;
+			strXml += name;
+			strXml += rightAnglebrackets;
 		}
-		strXml+=leftAnglebrackets;
-		strXml+=slash;
-		strXml+=name;
-		strXml+=rightAnglebrackets;
+		else
+		{
+			if (strSub.length() > 0)
+			{
+				strXml += rightAnglebrackets;
+				strXml += "\n";
+				strXml += strSub;
+				strXml += leftAnglebrackets;
+				strXml += slash;
+				strXml += name;
+				strXml += rightAnglebrackets;
+			}
+			else
+			{
+				strXml += slash;
+				strXml += rightAnglebrackets;
+			}
+			
+		}
+		
 		strXml+="\n";
 		return strXml;
 	}
@@ -210,7 +232,7 @@ public:
 			{			
 				node.name = GetNextToken();
 				std::string tk=GetNextToken();
-				while(!tk.empty() && tk.at(0)!=rightAnglebrackets)
+				while(!tk.empty() && tk.at(0)!=rightAnglebrackets && tk.at(0)!= slash)
 				{
 					std::string attrName = tk;
 					tk= GetNextToken();
@@ -219,7 +241,17 @@ public:
 						tk= GetNextToken();
 						std::string attrValue =tk;
 						node.SetAttr(attrName.c_str(),attrValue.c_str());
+						tk = GetNextToken();
 					}			
+				}
+				if (tk.at(0) == slash)
+				{
+					std::string temp = PeekNextToken();
+					if (!temp.empty() && temp.at(0) == rightAnglebrackets)
+					{
+						temp = GetNextToken();
+						break;
+					}
 				}
 		recheck:
 				tk= GetNextToken(true);
