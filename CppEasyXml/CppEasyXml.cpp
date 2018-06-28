@@ -4,7 +4,7 @@
 /*
 任何人都拥有平等的获取知识的权利
 
-CppEasyJson 是开放源代码的软件，任何人都可以下载、使用、修改和重新发布，不必担心任何版权问题
+CppEasyXml 是开放源代码的软件，任何人都可以下载、使用、修改和重新发布，不必担心任何版权问题
 
 请在重新发布的时候保留以上信息
 */
@@ -37,6 +37,10 @@ std::string CppEasyXml::toString(const char * encode)
 		}		
 	}
 	return temp +"\n"+ xmlRoot.ToString();
+}
+XmlNode CppEasyXml::GetRoot()
+{
+	return xmlRoot;
 }
 bool CppEasyXml::parseString(std::string & s)
 {
@@ -92,10 +96,18 @@ bool CppEasyXml::parseFile(const char * FilePathName)
 			{
 				content = W2UTF((wchar_t *)Buffer);
 			}
+			else if(encoding =="UTF-8")
+			{				
+				content = Buffer;
+			}	
+			else if (encoding == "ISO-8859-1")
+			{
+				content = AToU(Buffer);
+			}
 			else
 			{
 				content = Buffer;
-			}	
+			}
 			free(Buffer);
 		}
 		CloseHandle(hFile);

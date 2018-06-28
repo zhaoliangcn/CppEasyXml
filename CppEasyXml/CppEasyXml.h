@@ -3,7 +3,7 @@
 /*
 任何人都拥有平等的获取知识的权利
 
-CppEasyJson 是开放源代码的软件，任何人都可以下载、使用、修改和重新发布，不必担心任何版权问题
+CppEasyXml 是开放源代码的软件，任何人都可以下载、使用、修改和重新发布，不必担心任何版权问题
 
 请在重新发布的时候保留以上信息
 */
@@ -47,13 +47,19 @@ public:
 		if(strName)
 		name = strName;
 	}
-
+	std::string GetName()
+	{
+		return name;
+	}
 	void SetData(const char * strData)
 	{
 		if(strData)
 			data = strData;
 	}
-
+	std::string GetData()
+	{
+		return data;
+	}
 	void SetAttr(const char * attrName,const char * attrValue)
 	{
 		if(attrName && attrValue)
@@ -64,9 +70,90 @@ public:
 			attr.push_back(item);
 		}
 	}
+	bool GetAttr(const char * attrName, std::string & attrValue)
+	{
+		bool bret = false;
+		if (attrName)
+		{
+			for (int i = 0;i < attr.size();i++)
+			{
+				if (stricmp(attr.at(i).attrName.c_str(), attrName) == 0)
+				{
+					attrValue = attr.at(i).attrValue;
+					bret = true;
+					break;
+				}
+			}
+		}
+		return bret;
+	}
 	void AddSub(XmlNode & subNode)
 	{
 		subnode.push_back(subNode);
+	}
+	bool GetSub(int index, XmlNode & node)
+	{
+		bool bret = false;
+		if (index >= 0 && index < subnode.size())
+		{
+			node =  subnode.at(index);
+			bret = true;
+		}
+		return bret;
+	}
+	int GetFirstSub(const char * subName,XmlNode & node)
+	{
+		int index = -1;
+		if (subName)
+		{
+			for (int i = 0;i < subnode.size();i++)
+			{
+				if (stricmp(subnode.at(i).GetName().c_str(), subName) == 0)
+				{
+					index = i;
+					node = subnode.at(i);					
+					break;
+				}
+			}
+		}
+		return index;
+	}
+	// index is current subnode 
+	bool GetNextSub(const char * subName, int &index, XmlNode & node)
+	{
+		bool bret = false;
+		if (subName)
+		{
+			if (index >= 0 && index < subnode.size())
+			{
+				for (int i = index+1;i < subnode.size();i++)
+				{
+					if (stricmp(subnode.at(i).GetName().c_str(), subName) == 0)
+					{
+						index = i;
+						node = subnode.at(i);
+						bret = true;
+						break;
+					}
+				}
+			}			
+		}
+		return bret;
+	}
+	XmlNodes GetSubArray(const char * subName)
+	{
+		XmlNodes nodes;
+		if (subName)
+		{
+			for (int i = 0;i < subnode.size();i++)
+			{
+				if (stricmp(subnode.at(i).GetName().c_str(), subName) == 0)
+				{
+					nodes.push_back(subnode.at(i));
+				}
+			}
+		}		
+		return nodes;
 	}
 	std::string ToString()
 	{
@@ -333,14 +420,14 @@ public:
 				continue;
 			}
 			if(c == leftAnglebrackets ||
-				c== rightAnglebrackets ||
-				c== double_quotation_marks ||
+				c == rightAnglebrackets ||
+				c == double_quotation_marks ||
 				c == equal ||
 				c == slash ||
 				c == question_mark||
-				c ==exclamation_mark ||
-				c ==left_squarebrackets ||
-				c ==right_squarebrackets
+				c == exclamation_mark ||
+				c == left_squarebrackets ||
+				c == right_squarebrackets
 				)
 			{
 				if(cursor==currentpos)
@@ -406,6 +493,7 @@ public:
 	std::string GetEncodeType(const char *FilePathName);
 	std::string GetHeaderLine(const char * s);
 	std::string toString(const char * encode="UTF-8");
+	XmlNode GetRoot();
 
 	std::string xmlheadline;
 	std::string encoding;

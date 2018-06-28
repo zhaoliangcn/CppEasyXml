@@ -85,13 +85,22 @@ int TestFileParse(const char * FilePathName)
 	xml.parseFile(FilePathName);
 	std::string xxstr = UToA(xml.toString());
 	printf("%s\r\n", xxstr.c_str());
-
+	XmlNode root = xml.GetRoot();
+	printf("%s\r\n", root.GetName().c_str());
+	XmlNode sub;
+	int index = root.GetFirstSub("Container", sub);
+	if (index != -1)
+	{
+		std::string val;
+		sub.GetAttr("width", val);
+		printf("%s\r\n", val.c_str());		
+	}
 	return 0;
 }
 int wmain(int argc, wchar_t* argv[])
-{
+{	
 	TestFileParse("../Test/UISkin1.xml");
-	TestFile();
+	//TestFile();
 	//Test1();
 	return 0;
 }

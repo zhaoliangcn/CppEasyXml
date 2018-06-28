@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2043
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppEasyXml", "CppEasyXml.vcxproj", "{877D6580-DA95-4A10-955A-613BC8DD6408}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{877D6580-DA95-4A10-955A-613BC8DD6408}.Debug|x86.ActiveCfg = Debug|Win32
+		{877D6580-DA95-4A10-955A-613BC8DD6408}.Debug|x86.Build.0 = Debug|Win32
+		{877D6580-DA95-4A10-955A-613BC8DD6408}.Release|x86.ActiveCfg = Release|Win32
+		{877D6580-DA95-4A10-955A-613BC8DD6408}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2BDA8891-3398-47C1-9038-47AF2E80B5CE}
+	EndGlobalSection
+EndGlobal
