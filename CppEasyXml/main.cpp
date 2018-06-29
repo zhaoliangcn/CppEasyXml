@@ -99,8 +99,8 @@ int TestFileParse(const char * FilePathName)
 }
 int wmain(int argc, wchar_t* argv[])
 {	
-	TestFileParse("../Test/UISkin1.xml");
-	//TestFile();
+	//TestFileParse("../Test/UISkin1.xml");
+	TestFile();
 	//Test1();
 	return 0;
 }

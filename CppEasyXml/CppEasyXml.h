@@ -254,7 +254,7 @@ public:
 	void parseComment()
 	{
 		std::string tk= GetNextToken();
-		tk= GetNextToken();
+		//tk= GetNextToken();
 		while(tk.at(0)!=rightAnglebrackets)
 		{
 			tk= GetNextToken();	
@@ -267,6 +267,10 @@ public:
 				}
 			}
 		}
+	}
+	void parseDTD()
+	{
+		parseComment();
 	}
 	XmlNode parseData(const char * xStr,size_t xLen,std::string &encoding)
 	{
@@ -310,9 +314,18 @@ public:
 			else if(temp.at(0)==exclamation_mark)
 			{		
 				//³¢ÊÔ½âÎö²¢Ìø¹ý×¢ÊÍ
-				parseComment();
-				temp=GetNextToken();
-				temp = PeekNextToken();	
+				temp = GetNextToken();
+				temp = PeekNextToken();
+				if (temp == "DOCTYPE")
+				{
+					parseDTD();
+				}
+				else
+				{
+					parseComment();
+				}				
+				temp = GetNextToken();
+				temp = PeekNextToken();
 				continue;
 			}
 			else if(temp.at(0)!=exclamation_mark && temp.at(0)!=leftAnglebrackets)
@@ -331,7 +344,7 @@ public:
 						tk = GetNextToken();
 					}			
 				}
-				if (tk.at(0) == slash)
+				if (!tk.empty() && tk.at(0) == slash)
 				{
 					std::string temp = PeekNextToken();
 					if (!temp.empty() && temp.at(0) == rightAnglebrackets)
@@ -487,7 +500,7 @@ public:
 	CppEasyXml(void);
 	~CppEasyXml(void);
 
-	bool parseString(std::string & s);
+	bool parseString(std::string & s);//string's encode must be UTF-8
 	bool parseFile(const char * FilePathName);
 	bool saveToFile(const char * FilePathName,const char * encode="UTF-8");
 	std::string GetEncodeType(const char *FilePathName);
