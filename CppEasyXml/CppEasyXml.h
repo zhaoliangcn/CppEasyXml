@@ -332,11 +332,12 @@ public:
 			{			
 				node.name = GetNextToken();
 				std::string tk=GetNextToken();
+				bool gotdata = false;
 				while(!tk.empty() && tk.at(0)!=rightAnglebrackets && tk.at(0)!= slash)
 				{
 					std::string attrName = tk;
 					tk= GetNextToken();
-					if(tk.at(0)==equal)
+					if(!tk.empty() && tk.at(0)==equal)
 					{
 						tk= GetNextToken();
 						std::string attrValue =tk;
@@ -353,8 +354,28 @@ public:
 						break;
 					}
 				}
-		recheck:
-				tk= GetNextToken(true);
+				if (!tk.empty() && tk.at(0) == rightAnglebrackets)
+				{
+					if (node.name == "input"||
+						node.name == "br"||
+						node.name == "hr"||
+						node.name == "img"||
+						node.name == "option"||
+						node.name == "meta"||
+						node.name == "link")
+					{
+						break;
+					}					
+				}
+			recheck:
+				if (stricmp(node.name.c_str(), "script")==0)
+				{
+					tk = GetNextToken_NodeStart(true);
+				}
+				else
+				{
+					tk = GetNextToken_NodeStart(false);
+				}
 				rtrim(tk);
 				if(tk.empty())
 				{
@@ -402,6 +423,100 @@ public:
 		size_t privpos=currentpos;
 		std::string tk = GetNextToken();
 		currentpos=privpos;
+		return tk;
+	}
+	std::string GetNextToken_NodeStart(bool bscript)
+	{		
+		std::string tk;
+		bool gotstring = false;
+		char * buffer = NULL;
+		size_t cursor = currentpos;
+		unsigned char c = *(xmlStr + cursor);
+		while (isspace(c))
+		{
+			cursor++;
+			currentpos++;
+			c = *(xmlStr + cursor);
+		}
+		if (c == double_quotation_marks && !gotstring)
+		{
+			gotstring = true;
+			cursor++;
+			currentpos++;			
+		}
+		while (cursor < xmlLen)
+		{
+			c = *(xmlStr + cursor);		
+			if (c == slash)
+			{
+				if ((*(xmlStr + cursor + 1)) == slash)
+				{
+					cursor++;
+					cursor++;
+					c = *(xmlStr + cursor);
+					while (c != '\n')
+					{
+						cursor++;
+						c = *(xmlStr + cursor);
+					}
+				}
+			}			
+			if (c == leftAnglebrackets 
+				)
+			{
+				if (cursor == currentpos)
+				{
+					currentpos++;
+					if (!gotstring)
+						tk = c;
+					break;
+				}
+				else
+				{
+					if(bscript && (*(xmlStr + cursor + 1)) == slash)
+					{
+						int len = cursor - currentpos;
+						buffer = (char *)malloc(len + 1);
+						if (buffer)
+						{
+							memset(buffer, 0, len + 1);
+							memcpy(buffer, xmlStr + currentpos, len);
+							tk = buffer;
+							free(buffer);
+							currentpos = cursor;
+							if (gotstring)
+							{
+								currentpos++;
+							}
+							break;
+						}
+					}	
+					else
+					{
+						int len = cursor - currentpos;
+						buffer = (char *)malloc(len + 1);
+						if (buffer)
+						{
+							memset(buffer, 0, len + 1);
+							memcpy(buffer, xmlStr + currentpos, len);
+							tk = buffer;
+							free(buffer);
+							currentpos = cursor;
+							if (gotstring)
+							{
+								currentpos++;
+							}
+							break;
+						}
+					}
+				}
+			}
+			cursor++;
+		}
+		if (cursor >= xmlLen)
+		{
+			currentpos = cursor;
+		}
 		return tk;
 	}
 	std::string GetNextToken(bool containspace=false)

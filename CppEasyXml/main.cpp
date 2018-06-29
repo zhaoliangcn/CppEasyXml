@@ -95,12 +95,28 @@ int TestFileParse(const char * FilePathName)
 		sub.GetAttr("width", val);
 		printf("%s\r\n", val.c_str());		
 	}
+	index = root.GetFirstSub("Body", sub);
+	if (index != -1)
+	{
+		XmlNode sub1;
+		index = sub.GetFirstSub("form", sub1);
+		if (index != -1)
+		{
+			XmlNodes js = sub1.GetSubArray("Script");
+			for (int i = 0;i < js.size();i++)
+			{
+				std::string val = js.at(i).GetData();
+				printf("%s\r\n", val.c_str());
+			}
+		}
+	}
+	
 	return 0;
 }
 int wmain(int argc, wchar_t* argv[])
 {	
-	//TestFileParse("../Test/UISkin1.xml");
-	TestFile();
+	TestFileParse("../Test/UISkin1.xml");
+	//TestFile();
 	//Test1();
 	return 0;
 }
