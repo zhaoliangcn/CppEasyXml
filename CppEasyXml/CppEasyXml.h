@@ -558,6 +558,15 @@ public:
 				c == right_squarebrackets
 				)
 			{
+				if (c == slash)
+				{
+					if (((*(xmlStr + cursor - 1)) != leftAnglebrackets) &&
+						(((*(xmlStr + cursor + 1)) != rightAnglebrackets)))
+					{
+						cursor++;
+						continue;
+					}
+				}				
 				if(cursor==currentpos)
 				{
 					currentpos++;
