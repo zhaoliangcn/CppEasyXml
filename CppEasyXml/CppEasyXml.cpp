@@ -22,21 +22,28 @@ CppEasyXml::~CppEasyXml(void)
 }
 std::string CppEasyXml::toString(const char * encode)
 {
-	std::string temp=xmlheadline;
-	if(stricmp(encode,"UTF-8")==0)
+	//std::string temp=xmlheadline;
+	//if(stricmp(encode,"UTF-8")==0)
+	//{
+	//	size_t pos1=temp.find("encoding=\"");
+	//	if(pos1!=std::string::npos)
+	//	{
+	//		pos1+=strlen("encoding=\"");
+	//		size_t pos2=temp.find("\"",pos1+1);
+	//		if(pos2!=std::string::npos)
+	//		{
+	//			temp.replace(pos1,pos2-pos1,encode);
+	//		}
+	//	}		
+	//}
+	std::string temp;
+	for (int i = 0;i < xmlheadlines.size();i++)
 	{
-		size_t pos1=temp.find("encoding=\"");
-		if(pos1!=std::string::npos)
-		{
-			pos1+=strlen("encoding=\"");
-			size_t pos2=temp.find("\"",pos1+1);
-			if(pos2!=std::string::npos)
-			{
-				temp.replace(pos1,pos2-pos1,encode);
-			}
-		}		
+		temp += xmlheadlines.at(i).toStrng(encode);
+		temp += "\n";
 	}
-	return temp +"\n"+ xmlRoot.ToString();
+	return temp+ xmlRoot.ToString();
+	//return temp +"\n"+ xmlRoot.ToString();
 }
 XmlNode CppEasyXml::GetRoot()
 {
@@ -45,7 +52,7 @@ XmlNode CppEasyXml::GetRoot()
 bool CppEasyXml::parseString(std::string & s)
 {
 	xmlheadline = GetHeaderLine(s.c_str());
-	xmlRoot=lex.parseData(s.c_str(),s.length(),encoding);
+	lex.parseData(s.c_str(),s.length(),encoding, xmlRoot, xmlheadlines);
 	return true;
 }
 std::string  CppEasyXml::GetHeaderLine(const char * s)
@@ -146,7 +153,7 @@ std::string CppEasyXml::GetEncodeType(const char *FilePathName)
 		{
 			pBuffer = Buffer;
 		}
-		char * p =(char *)strstr(pBuffer.c_str(),"encoding=\"");
+		char * p =(char *)strstr(pBuffer.c_str(),"encoding=\"");		
 		if(p)
 		{
 			encode=p+strlen("encoding=\"");
@@ -154,6 +161,19 @@ std::string CppEasyXml::GetEncodeType(const char *FilePathName)
 			if(pos!=std::string::npos)
 			{
 				encode=encode.substr(0,pos);
+			}
+		}
+		else
+		{
+			p = (char *)strstr(pBuffer.c_str(), "encoding=\'");
+			if (p)
+			{
+				encode = p + strlen("encoding=\'");
+				size_t pos = encode.find("\'");
+				if (pos != std::string::npos)
+				{
+					encode = encode.substr(0, pos);
+				}
 			}
 		}
 		CloseHandle(hFile);

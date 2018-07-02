@@ -15,6 +15,7 @@ CppEasyXml  «ø™∑≈‘¥¥˙¬Îµƒ»Ìº˛£¨»Œ∫Œ»À∂ºø…“‘œ¬‘ÿ°¢ π”√°¢–ﬁ∏ƒ∫Õ÷ÿ–¬∑¢≤º£¨≤ª±ÿµ£–ƒ»
 static const char  leftAnglebrackets = '<';
 static const char  rightAnglebrackets = '>';
 static const char  double_quotation_marks = '\"';
+static const char  single_quotation_marks = '\'';
 static const char  equal = '=';
 static const char  slash = '/';
 static const char  question_mark ='?';
@@ -31,6 +32,47 @@ typedef struct _tag_XmlAttrItem
 typedef std::vector<XmlAttrItem> XmlAtrr;
 class XmlNode;
 typedef std::vector<XmlNode> XmlNodes;
+class XmlHeadLine
+{
+public:
+	XmlHeadLine()
+	{
+
+	}
+	~XmlHeadLine()
+	{
+
+	}
+	std::string toStrng(const char * encode)
+	{
+		std::string temp;
+		temp += leftAnglebrackets;
+		temp += question_mark;
+		temp += name;
+		for (int i = 0;i < attr.size();i++)
+		{
+			temp += " ";
+			temp += attr.at(i).attrName;
+			temp += "=";
+			temp += "\"";
+			if (stricmp(attr.at(i).attrName.c_str(), "encoding") == 0)
+			{
+				temp += encode;
+			}
+			else
+			{
+				temp += attr.at(i).attrValue;
+			}			
+			temp += "\"";
+		}
+		temp += question_mark;
+		temp += rightAnglebrackets;
+		return temp;
+	}
+	std::string name;
+	XmlAtrr attr;
+};
+typedef std::vector<XmlHeadLine> XmlHeadLines;
 class XmlNode
 {
 public:
@@ -232,24 +274,52 @@ public:
 	{
 
 	}
-	void parseHeadLine(std::string & encoding)
+	XmlHeadLine parseHeadLine(std::string & encoding)
 	{
+		XmlHeadLine xmlheadline;
 		std::string tk= GetNextToken();
-		tk= GetNextToken();
-		while(tk.at(0)!=question_mark)
-		{
-			tk= GetNextToken();
-			if(tk=="encoding")
+		if (!tk.empty() && tk.at(0) == question_mark)
+		{			
+			tk = GetNextToken();
+			xmlheadline.name = tk;
+			while (tk.at(0) != question_mark)
 			{
-				tk=GetNextToken();
-				if(tk.at(0)==equal)
+				XmlAttrItem xmlattritem;
+				tk = GetNextToken();
+				xmlattritem.attrName = tk;
+				if (tk == "encoding")
 				{
-					tk=GetNextToken();
-					encoding = tk;
+					tk = GetNextToken();
+					if (tk.at(0) == equal)
+					{
+						tk = GetNextToken();
+						encoding = tk;
+						xmlattritem.attrValue = tk;
+					}
 				}
+				else
+				{
+					tk = GetNextToken();
+					if (tk.at(0) == equal)
+					{
+						tk = GetNextToken();
+						xmlattritem.attrValue = tk;
+					}
+				}
+				xmlheadline.attr.push_back(xmlattritem);
+				tk = PeekNextToken();
 			}
-		}
-		tk= GetNextToken(); 
+			tk = GetNextToken();
+			if (!tk.empty() && tk.at(0) == question_mark )
+			{
+				tk = PeekNextToken();
+				if (!tk.empty() && tk.at(0) == rightAnglebrackets)
+				{
+					tk = GetNextToken();
+				}
+			}			
+		}	
+		return xmlheadline;
 	}
 	void parseComment()
 	{
@@ -272,7 +342,7 @@ public:
 	{
 		parseComment();
 	}
-	XmlNode parseData(const char * xStr,size_t xLen,std::string &encoding)
+	bool parseData(const char * xStr,size_t xLen,std::string &encoding, XmlNode & root, XmlHeadLines& xmlheadlines)
 	{
 		//while(!token.empty())
 		//{
@@ -289,15 +359,14 @@ public:
 			currentpos++;
 			c= *(xmlStr+currentpos);
 		}
-		XmlNode node;
 		std::string token=GetNextToken();
 		if(token.at(0)==leftAnglebrackets)
 		{			
-			node = parseNode(encoding);
+			root = parseNode(encoding, xmlheadlines);
 		}		
-		return node;
+		return true;
 	}
-	XmlNode parseNode(std::string &encoding)
+	XmlNode parseNode(std::string &encoding ,XmlHeadLines& xmlheadlines)
 	{
 		XmlNode node;
 		std::string temp = PeekNextToken();	
@@ -306,7 +375,8 @@ public:
 			if(temp.at(0)==question_mark)
 			{		
 				//≥¢ ‘Ω‚ŒˆHeadline	
-				parseHeadLine(encoding);
+				XmlHeadLine xmlheadline = parseHeadLine(encoding);
+				xmlheadlines.push_back(xmlheadline);
 				temp=GetNextToken();
 				temp = PeekNextToken();	
 				continue;
@@ -403,7 +473,7 @@ public:
 					}
 					else
 					{
-						XmlNode subnode =  parseNode(encoding);
+						XmlNode subnode =  parseNode(encoding, xmlheadlines);
 						node.AddSub(subnode);
 						goto recheck;
 					}
@@ -519,9 +589,10 @@ public:
 		}
 		return tk;
 	}
-	std::string GetNextToken(bool containspace=false)
+	std::string GetNextToken()
 	{
 		bool gotstring = false;
+		bool single_quotation_string = false;
 		std::string tk;
 		char * buffer =NULL;
 		size_t cursor=currentpos;
@@ -542,7 +613,20 @@ public:
 				currentpos++;
 				continue;
 			}
-			else if(c!= double_quotation_marks && gotstring)
+			else if(c!= double_quotation_marks && gotstring && !single_quotation_string)
+			{
+				cursor++;
+				continue;
+			}
+			if (c == single_quotation_marks && !gotstring)
+			{
+				gotstring = true;
+				single_quotation_string = true;
+				cursor++;
+				currentpos++;
+				continue;
+			}
+			else if (c != single_quotation_marks && gotstring && single_quotation_string)
 			{
 				cursor++;
 				continue;
@@ -550,6 +634,7 @@ public:
 			if(c == leftAnglebrackets ||
 				c == rightAnglebrackets ||
 				c == double_quotation_marks ||
+				c == single_quotation_marks ||
 				c == equal ||
 				c == slash ||
 				c == question_mark||
@@ -593,7 +678,7 @@ public:
 					}
 				}
 			}
-			else if(!containspace && isspace(c))
+			else if(isspace(c))
 			{
 				int len=cursor-currentpos;
 				buffer = (char *)malloc(len+1);
@@ -632,6 +717,7 @@ public:
 	std::string toString(const char * encode="UTF-8");
 	XmlNode GetRoot();
 
+	XmlHeadLines xmlheadlines;
 	std::string xmlheadline;
 	std::string encoding;
 	XmlNode xmlRoot;
