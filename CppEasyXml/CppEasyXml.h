@@ -399,11 +399,17 @@ public:
 				temp = PeekNextToken();
 				continue;
 			}
-			else if(temp.at(0)!=exclamation_mark && temp.at(0)!=leftAnglebrackets)
-			{			
-				node.name = GetNextToken();
-				std::string tk=GetNextToken();
+			else if(temp.at(0)!=exclamation_mark && temp.at(0)!=leftAnglebrackets )
+			{		
 				bool gotdata = false;
+				std::string tk;
+				if (temp.at(0) == slash)
+				{
+					currentpos--;
+					break;					
+				}
+				node.name = GetNextToken();
+				tk = GetNextToken();
 				while(!tk.empty() && tk.at(0)!=rightAnglebrackets && tk.at(0)!= slash)
 				{
 					std::string attrName = tk;
@@ -509,18 +515,18 @@ public:
 			currentpos++;
 			c = *(xmlStr + cursor);
 		}
-		if (c == double_quotation_marks && !gotstring)
-		{
-			gotstring = true;
-			cursor++;
-			currentpos++;			
-		}
-		if (c == single_quotation_marks && !gotstring)
-		{
-			gotstring = true;
-			cursor++;
-			currentpos++;
-		}
+		//if (c == double_quotation_marks && !gotstring)
+		//{
+		//	gotstring = true;
+		//	cursor++;
+		//	currentpos++;			
+		//}
+		//if (c == single_quotation_marks && !gotstring)
+		//{
+		//	gotstring = true;
+		//	cursor++;
+		//	currentpos++;
+		//}
 		if (c == slash)
 		{
 			if ((*(xmlStr + cursor + 1)) == slash)
