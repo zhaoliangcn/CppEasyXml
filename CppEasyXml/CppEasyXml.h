@@ -22,6 +22,7 @@ static const char  question_mark ='?';
 static const char  exclamation_mark='!';
 static const char  left_squarebrackets='[';
 static const char  right_squarebrackets=']';
+static const char  backslash = '\\';
 
 typedef struct _tag_XmlAttrItem
 {
@@ -514,23 +515,30 @@ public:
 			cursor++;
 			currentpos++;			
 		}
+		if (c == single_quotation_marks && !gotstring)
+		{
+			gotstring = true;
+			cursor++;
+			currentpos++;
+		}
+		if (c == slash)
+		{
+			if ((*(xmlStr + cursor + 1)) == slash)
+			{
+				cursor++;
+				cursor++;
+				c = *(xmlStr + cursor);
+				while (c != '\n')
+				{
+					cursor++;
+					c = *(xmlStr + cursor);
+				}
+			}
+		}
 		while (cursor < xmlLen)
 		{
 			c = *(xmlStr + cursor);		
-			if (c == slash)
-			{
-				if ((*(xmlStr + cursor + 1)) == slash)
-				{
-					cursor++;
-					cursor++;
-					c = *(xmlStr + cursor);
-					while (c != '\n')
-					{
-						cursor++;
-						c = *(xmlStr + cursor);
-					}
-				}
-			}			
+				
 			if (c == leftAnglebrackets 
 				)
 			{
@@ -543,23 +551,27 @@ public:
 				}
 				else
 				{
-					if(bscript && (*(xmlStr + cursor + 1)) == slash)
+					if(bscript )
 					{
-						int len = cursor - currentpos;
-						buffer = (char *)malloc(len + 1);
-						if (buffer)
+						if ((*(xmlStr + cursor + 1)) == slash)
 						{
-							memset(buffer, 0, len + 1);
-							memcpy(buffer, xmlStr + currentpos, len);
-							tk = buffer;
-							free(buffer);
-							currentpos = cursor;
-							if (gotstring)
+							int len = cursor - currentpos;
+							buffer = (char *)malloc(len + 1);
+							if (buffer)
 							{
-								currentpos++;
+								memset(buffer, 0, len + 1);
+								memcpy(buffer, xmlStr + currentpos, len);
+								tk = buffer;
+								free(buffer);
+								currentpos = cursor;
+								if (gotstring)
+								{
+									currentpos++;
+								}
+								break;
 							}
-							break;
 						}
+						
 					}	
 					else
 					{
@@ -615,6 +627,15 @@ public:
 			}
 			else if(c!= double_quotation_marks && gotstring && !single_quotation_string)
 			{
+				if (c == backslash)
+				{
+					if ((*(xmlStr + cursor + 1)) == double_quotation_marks)
+					{
+						cursor++;
+						cursor++;
+						continue;
+					}
+				}
 				cursor++;
 				continue;
 			}
@@ -628,9 +649,19 @@ public:
 			}
 			else if (c != single_quotation_marks && gotstring && single_quotation_string)
 			{
+				if (c == backslash)
+				{
+					if ((*(xmlStr + cursor + 1)) == single_quotation_marks)
+					{
+						cursor++;
+						cursor++;
+						continue;
+					}
+				}
 				cursor++;
 				continue;
 			}
+			
 			if(c == leftAnglebrackets ||
 				c == rightAnglebrackets ||
 				c == double_quotation_marks ||

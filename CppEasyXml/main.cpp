@@ -117,8 +117,9 @@ int wmain(int argc, wchar_t* argv[])
 {	
 	//TestFileParse("../Test/UISkin1.xml");
 	//TestFileParse("C:\\eclipse-jee-photon-R-win32-x86_64\\eclipse\\artifacts.xml");
+	TestFileParse("F:\\temp\\Mobile_GeckoView - MozillaWiki.html");
 	
-	TestFile();
+	//TestFile();
 	//Test1();
 	return 0;
 }
